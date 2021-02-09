@@ -1,0 +1,12 @@
+{
+  "name": "Schema",
+  "schemaPath": "bco.schema.json",
+  "extensions": {
+    "endpoints": {
+      "Default": {
+        "url": "http://demo.basecubeone.org:13781/graphql",
+        "introspect": true
+      }
+    }
+  }
+}

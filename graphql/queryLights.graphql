@@ -1,0 +1,8 @@
+query filterByType($type: openbase_type_domotic_unit_UnitTemplate_UnitType!) {
+    unitConfigs(
+        includeDisabledUnits: false
+        filter: { properties: { unitType: $type } }
+    ) {
+        labelString
+    }
+}
