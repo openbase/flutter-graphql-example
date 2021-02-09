@@ -1,8 +1,13 @@
-query filterByType($type: openbase_type_domotic_unit_UnitTemplate_UnitType!) {
-    unitConfigs(
-        includeDisabledUnits: false
-        filter: { properties: { unitType: $type } }
-    ) {
+query filterByType($alias: [String]!) {
+    unitConfigs(filter: { properties: { alias: $alias }}) {
+        id,
+        labelString
+    }
+}
+
+subscription filterByTypeViaSubscription($alias: [String]!) {
+    unitConfigs(filter: { properties: { alias: $alias }}) {
+        id,
         labelString
     }
 }

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_graphql_example/graphql_api.dart';
+import 'package:flutter_graphql_example/graphql_provide.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 
 void main() {
   runApp(MyApp());
@@ -8,26 +11,29 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-        // This makes the visual density adapt to the platform that you run
-        // the app on. For desktop platforms, the controls will be smaller and
-        // closer together (more dense) than on mobile platforms.
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+    return GraphqlProvider(
+        uri: 'http://demo.basecubeone.org:13781/graphql',
+        subscriptionUri: 'ws://demo.basecubeone.org:13781/subscriptions',
+        child: MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            // This is the theme of your application.
+            //
+            // Try running your application with "flutter run". You'll see the
+            // application has a blue toolbar. Then, without quitting the app, try
+            // changing the primarySwatch below to Colors.green and then invoke
+            // "hot reload" (press "r" in the console where you ran "flutter run",
+            // or simply save your changes to "hot reload" in a Flutter IDE).
+            // Notice that the counter didn't reset back to zero; the application
+            // is not restarted.
+            primarySwatch: Colors.blue,
+            // This makes the visual density adapt to the platform that you run
+            // the app on. For desktop platforms, the controls will be smaller and
+            // closer together (more dense) than on mobile platforms.
+            visualDensity: VisualDensity.adaptivePlatformDensity,
+          ),
+          home: MyHomePage(title: 'Flutter Demo Home Page'),
+        ));
   }
 }
 
@@ -77,35 +83,76 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+      body: Column(
+        children: <Widget>[
+          Expanded(
+              child: Subscription(
+            options: SubscriptionOptions(
+              document: filterByTypeViaSubscription,
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+            builder: (result) {
+              if (result.hasException) {
+                return Text(result.exception.toString());
+              }
+
+              if (result.isLoading) {
+                return Center(
+                  child: const CircularProgressIndicator(),
+                );
+              }
+              // ResultAccumulator is a provided helper widget for collating subscription results.
+              // careful though! It is stateful and will discard your results if the state is disposed
+              return ResultAccumulator.appendUniqueEntries(
+                latest: result.data,
+                builder: (context, {results}) => DisplayReviews(
+                  reviews: results.reversed.toList(),
+                ),
+              );
+            },
+          )),
+          Expanded(
+            child: Query(
+              options: QueryOptions(
+                  document: FilterByTypeQuery().document,
+                  variables: {"alias": "ColorableLight-17"}),
+              builder: (
+                QueryResult result, {
+                Future<QueryResult> Function() refetch,
+                FetchMore fetchMore,
+              }) {
+                if (result.hasException) {
+                  return Text(result.exception.toString());
+                }
+
+                if (result.loading) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                final unitConfigs =
+                    FilterByType.fromJson(result.data).unitConfigs;
+
+                return ListView.builder(
+                  itemBuilder: (_, index) {
+                    return ListTile(
+                      leading: Icon(Icons.card_travel),
+                      title: Text(unitConfigs[index].labelString),
+                      subtitle: Text(unitConfigs[index].id),
+                    );
+                  },
+                  itemCount: unitConfigs.length,
+                );
+              },
             ),
-          ],
-        ),
+          ),
+          Expanded(
+            child: FittedBox(
+              fit: BoxFit.contain, // otherwise the logo will be tiny
+              child: const FlutterLogo(),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
