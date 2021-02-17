@@ -88,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Expanded(
               child: Subscription(
             options: SubscriptionOptions(
-              document: filterByTypeViaSubscription,
+              document: FilterByTypeViaSubscriptionSubscription().document,
             ),
             builder: (result) {
               if (result.hasException) {
@@ -100,6 +100,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: const CircularProgressIndicator(),
                 );
               }
+
+              final unitConfigs =
+                  FilterByTypeViaSubscription$Subscription.fromJson(result.data).unitConfigs;
+
               // ResultAccumulator is a provided helper widget for collating subscription results.
               // careful though! It is stateful and will discard your results if the state is disposed
               return ResultAccumulator.appendUniqueEntries(
