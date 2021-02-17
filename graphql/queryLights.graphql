@@ -11,3 +11,14 @@ subscription filterByTypeViaSubscription($alias: [String]!) {
         labelString
     }
 }
+
+subscription powerStateSubscription($id: String!){
+    units(filter: {
+        properties: {
+            id: $id
+        }
+    }) {
+        id
+        powerState {value}
+    }
+}
