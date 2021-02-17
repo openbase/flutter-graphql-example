@@ -20,20 +20,20 @@ final GraphQLCache cache = GraphQLCache(
 
 ValueNotifier<GraphQLClient> clientFor({
   @required String uri,
-  String subscriptionUri,
+  @required String subscriptionUri,
 }) {
-  Link link = HttpLink(uri);
-  if (subscriptionUri != null) {
-    final WebSocketLink websocketLink = WebSocketLink(
-      subscriptionUri,
-      config: SocketClientConfig(
-        autoReconnect: true,
-        inactivityTimeout: Duration(seconds: 30),
-      ),
-    );
+  final HttpLink httpLink = HttpLink(uri);
+  final WebSocketLink webSocketLink = WebSocketLink(
+    subscriptionUri,
+    config: SocketClientConfig(
+      autoReconnect: true,
+      inactivityTimeout: Duration(seconds: 30),
+    ),
+  );
 
-    link = link.concat(websocketLink);
-  }
+    //link = link.concat(webSocketLink);
+  final Link link = Link.split((request) => request.isSubscription, webSocketLink, httpLink);
+
 
   return ValueNotifier<GraphQLClient>(
     GraphQLClient(
