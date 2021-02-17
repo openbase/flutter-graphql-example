@@ -89,6 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Subscription(
             options: SubscriptionOptions(
               document: FilterByTypeViaSubscriptionSubscription().document,
+              variables: {"alias": ["ColorableLight-17"]},
             ),
             builder: (result) {
               if (result.hasException) {
@@ -101,16 +102,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
               }
 
-              final unitConfigs =
-                  FilterByTypeViaSubscription$Subscription.fromJson(result.data).unitConfigs;
+              //final unitConfigs =
+                  //FilterByTypeViaSubscription$Subscription.fromJson(result.data).unitConfigs;
 
               // ResultAccumulator is a provided helper widget for collating subscription results.
               // careful though! It is stateful and will discard your results if the state is disposed
               return ResultAccumulator.appendUniqueEntries(
                 latest: result.data,
-                builder: (context, {results}) => DisplayReviews(
-                  reviews: results.reversed.toList(),
-                ),
+                builder: (context, {results}) => createSubscriptionWidget(results)
               );
             },
           )),
@@ -135,7 +134,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 }
 
                 final unitConfigs =
-                    FilterByType.fromJson(result.data).unitConfigs;
+                    FilterByType$QueryType.fromJson(result.data).unitConfigs;
 
                 return ListView.builder(
                   itemBuilder: (_, index) {
@@ -165,4 +164,20 @@ class _MyHomePageState extends State<MyHomePage> {
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+}
+
+ListView createSubscriptionWidget(results) {
+  final unitConfigs =
+      FilterByTypeViaSubscription$Subscription.fromJson(results.data).unitConfigs;
+
+  return ListView.builder(
+      itemBuilder: (_, index) {
+    return ListTile(
+      leading: Icon(Icons.card_travel),
+      title: Text(unitConfigs[index].labelString),
+      subtitle: Text(unitConfigs[index].id),
+    );
+  },
+  itemCount: unitConfigs.length,
+  );
 }
