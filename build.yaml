@@ -11,3 +11,7 @@ targets:
             - schema: bco.schema.json
               queries_glob: graphql/*.graphql
               output: lib/graphql_api.dart
+          scalar_mapping:
+            - custom_parser_import: 'package:flutter_graphql_example/coercers.dart'
+              graphql_type: Long
+              dart_type: int
