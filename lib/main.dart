@@ -88,10 +88,12 @@ class _MyHomePageState extends State<MyHomePage> {
           Expanded(
               child: Subscription(
             options: SubscriptionOptions(
-              document: FilterByTypeViaSubscriptionSubscription().document,
-              variables: {"alias": ["ColorableLight-17"]},
+              document: PowerStateSubscriptionSubscription().document,
+              variables: {"id": "66b5b93f-9f33-4d7d-8e61-5951a22f5483"},
             ),
             builder: (result) {
+              print('New result?' + result.toString());
+
               if (result.hasException) {
                 return Text(result.exception.toString());
               }
@@ -102,6 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
               }
 
+              //result.data
               //final unitConfigs =
                   //FilterByTypeViaSubscription$Subscription.fromJson(result.data).unitConfigs;
 
@@ -166,18 +169,22 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-ListView createSubscriptionWidget(results) {
-  final unitConfigs =
-      FilterByTypeViaSubscription$Subscription.fromJson(results.data).unitConfigs;
+ListView createSubscriptionWidget(List<Map<String, dynamic>> results) {
+  print('Results.length' + results.length.toString());
+  final List<PowerStateSubscription$Subscription$OpenbaseTypeDomoticUnitUnitData> units = [];
+  for (var unit in results.map((e) => PowerStateSubscription$Subscription.fromJson(e).units)) {
+      units.add(unit);
+  }
+  print(units.length);
 
   return ListView.builder(
       itemBuilder: (_, index) {
     return ListTile(
       leading: Icon(Icons.card_travel),
-      title: Text(unitConfigs[index].labelString),
-      subtitle: Text(unitConfigs[index].id),
+      title: Text((units[index].powerState != null) ? units[index].powerState.value.toString() : 'Unknown'),
+      subtitle: Text((units[index].id != null) ? units[index].id : 'ID?'),
     );
   },
-  itemCount: unitConfigs.length,
+  itemCount: units.length,
   );
 }
