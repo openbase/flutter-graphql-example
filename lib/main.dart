@@ -153,10 +153,20 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           Expanded(
-            child: FittedBox(
-              fit: BoxFit.contain, // otherwise the logo will be tiny
-              child: const FlutterLogo(),
-            ),
+            child: Row(
+              children: [
+                Mutation(
+                    options: MutationOptions (
+                      document: ChangePowerStateMutation().document
+                    ),
+                    builder: (RunMutation runMutation, QueryResult qRes) {
+                      return FloatingActionButton(
+                          onPressed: () => test(runMutation),
+                      tooltip: "ON",
+                      child: Text("ON"),);
+                    })
+              ],
+            )
           ),
         ],
       ),
@@ -187,4 +197,14 @@ ListView createSubscriptionWidget(List<Map<String, dynamic>> results) {
   },
   itemCount: units.length,
   );
+}
+
+void test(RunMutation runMutation) {
+  final params = {
+    "id": "66b5b93f-9f33-4d7d-8e61-5951a22f5483"
+  };
+
+  print('Run mutation with params: ' + params.toString());
+
+  runMutation(params);
 }

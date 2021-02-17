@@ -22,3 +22,17 @@ subscription powerStateSubscription($id: String!){
         powerState {value}
     }
 }
+
+mutation changePowerState($id: String!) {
+    units(filter: {
+        properties: {
+            id: $id
+        }
+    }, data: {
+        powerState: {value: ON}
+    }
+    ) {
+        id
+        powerState {value}
+    }
+}
